@@ -9,7 +9,7 @@ How it use:
 		move your finger to the screen, ie the z-axis, to generate the left button press
 		go go back to generate left button release.
 
-	emulate rigth button of mouse:
+	emulate right button of mouse:
 		with more than one finger, make a circular motion
 
 	emulate wheel:
