@@ -5,14 +5,14 @@ LeapMouse is a simple program to use the mouse with Leapmotion in linux
 
 How it use:
   move a cursor with one finger
-	emulate left button of moouse:
+	Left button of mouse:
 		move your finger to the screen, ie the z-axis, to generate the left button press
 		go go back to generate left button release.
 
-	emulate right button of mouse:
+	Right button of mouse:
 		with more than one finger, make a circular motion
 
-	emulate wheel:
+	Mouse wheel:
 		with more than one finger,make a vertical linear movement.
 
 
