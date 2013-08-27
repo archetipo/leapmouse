@@ -11,7 +11,7 @@ ifeq ($(OS), Linux)
   ifeq ($(ARCH), x86_64)
     LEAP_LIBRARY = -Wl,-rpath,../../lib/x64  -L../../lib/x64 -lLeap
   else
-    LEAP_LIBRARY = -Wl,-rpath,../../lib/x86  -L../../lib/x64 -lLeap
+    LEAP_LIBRARY = -Wl,-rpath,../../lib/x86  -L../../lib/x86 -lLeap
   endif
 
 endif
