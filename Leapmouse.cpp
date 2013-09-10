@@ -1,13 +1,25 @@
-
-
 #include <iostream>
+
+#include <time.h>
+
 #include "Leap.h"
 #include "mousemanager.h"
+
+#ifndef ACTIVETIMEOUT
+#define ACTIVETIMEOUT 300 // wait before auto-deactive (seconds)
+#endif
+
+#ifndef TOGGLE_FRAME_LIMIT
+#define TOGGLE_FRAME_LIMIT 10 // frames to wait after (de-)activation before allowing another
+#endif
+
+
 using namespace Leap;
 
+int64_t lastFrameID = 0; // last frame processed
+int64_t lastToggle = 0; // frame id of the last frame we toggled activity
 
-
-
+time_t lastEvent = 0; // epoch time in seconds of last event
 
 class SampleListener : public Listener {
   public:
@@ -26,6 +38,7 @@ class SampleListener : public Listener {
     int side;
     int sensibility;  // value for sensibility click incrise value decrise  sensibility
     int rclick;
+    bool active; // if we're currently active -- should this be a class member??
 
 };
 void SampleListener::onInit(const Controller& controller) {
@@ -35,7 +48,7 @@ void SampleListener::onInit(const Controller& controller) {
 void SampleListener::onConnect(const Controller& controller) {
   std::cout << "Connected" << std::endl;
   controller.enableGesture(Gesture::TYPE_CIRCLE);
-  //~ controller.enableGesture(Gesture::TYPE_KEY_TAP);
+  controller.enableGesture(Gesture::TYPE_KEY_TAP);
   //~ controller.enableGesture(Gesture::TYPE_SCREEN_TAP);
   controller.enableGesture(Gesture::TYPE_SWIPE);
 }
@@ -54,10 +67,42 @@ void SampleListener::onExit(const Controller& controller) {
 void SampleListener::onFrame(const Controller& controller) {
   // Get the most recent frame and report some basic information
 	const Frame frame = controller.frame();
-	int currid=0;
-	currid=1;
+	//int currid=1;
 
- // Mouse->move(800,50);
+	//check if we already processed this frame
+	if (frame.id() == lastFrameID)
+		return;
+	lastFrameID = frame.id();
+
+	//stop activity if we've not been used for ACTIVETIMEOUT
+	if ((ACTIVETIMEOUT + lastEvent) < time(0) && this->active)
+	{
+		std::cout << "auto deactivated" << std::endl;
+		this->active = false;
+	}
+
+	if (frame.fingers().count() == 2)
+	{
+		GestureList gestures = frame.gestures();
+		for (int it = 0; it < gestures.count(); ++it)
+		{
+			if (gestures[it].type() != Gesture::TYPE_KEY_TAP)
+				continue;
+			if ((lastToggle + TOGGLE_FRAME_LIMIT) > frame.id()) //avoid detecting the same tap twice
+				continue;
+			KeyTapGesture gesture = gestures[it];
+			Vector v = gesture.direction();
+			this->active = !this->active;
+			lastToggle = frame.id();
+			lastEvent = time(0);
+			std::cout << (this->active ? "activated" : "deactivated") << std::endl;
+			break; //make sure we don't accidentally use the same list twice
+		}
+	}
+
+	if (!this->active)
+		return;
+
 	if (frame.fingers().count()==1 & side!=2 ){
 		PointableList pointables = frame.pointables();
 		InteractionBox iBox = frame.interactionBox();
@@ -101,6 +146,7 @@ void SampleListener::onFrame(const Controller& controller) {
 			}
 
 		}
+		lastEvent = time(0);
 	}
 	else if (frame.fingers().count()>1 & side!=1)
 	{
@@ -163,10 +209,8 @@ void SampleListener::onFrame(const Controller& controller) {
 					break;
 				}
 		}
+		lastEvent = time(0);
 	}
-
-
-
 }
 
 void SampleListener::onFocusGained(const Controller& controller) {
@@ -182,7 +226,6 @@ int main() {
   SampleListener listener;
   Controller controller;
 
-
   listener.Mouse=new MouseManager();
   listener.mystate=0;
   listener.clickcount=0;
@@ -191,10 +234,15 @@ int main() {
   listener.pressedDelay=0;
   listener.rclick=0;
   listener.sensibility=8;
+  listener.active=false;
   std::cout << "width: "<<   listener.Mouse->w_width << std::endl;
   std::cout << "height: "<<   listener.Mouse->w_height << std::endl;
   // Have the sample listener receive events from the controller
   controller.addListener(listener);
+
+  // set the times
+  lastEvent  = time(0);
+  lastToggle = 0;
 
   // Keep this process running until Enter is pressed
   std::cout << "Press Enter to quit..." << std::endl;
