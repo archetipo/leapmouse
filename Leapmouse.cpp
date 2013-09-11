@@ -35,8 +35,6 @@ void SampleListener::onInit(const Controller& controller) {
 void SampleListener::onConnect(const Controller& controller) {
   std::cout << "Connected" << std::endl;
   controller.enableGesture(Gesture::TYPE_CIRCLE);
-  //~ controller.enableGesture(Gesture::TYPE_KEY_TAP);
-  //~ controller.enableGesture(Gesture::TYPE_SCREEN_TAP);
   controller.enableGesture(Gesture::TYPE_SWIPE);
 }
 
@@ -52,12 +50,10 @@ void SampleListener::onExit(const Controller& controller) {
 }
 
 void SampleListener::onFrame(const Controller& controller) {
-  // Get the most recent frame and report some basic information
+  // Get the most recent frame and calculate the mouse action
 	const Frame frame = controller.frame();
 	int currid=0;
 	currid=1;
-
- // Mouse->move(800,50);
 	if (frame.fingers().count()==1 & side!=2 ){
 		PointableList pointables = frame.pointables();
 		InteractionBox iBox = frame.interactionBox();
@@ -137,8 +133,7 @@ void SampleListener::onFrame(const Controller& controller) {
 							  this->mystate=1; //up
 							 // std::cout << "wheel up " <<std::endl;
 						  }else if(d[1]<-0.8){
-							  this->mystate=2; //down
-							   //std::cout << "wheel down " <<std::endl;
+							  this->mystate=2;
 						  }
 						  if(swipe.state()==3){
 							if(this->mystate==1){
