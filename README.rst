@@ -43,7 +43,7 @@ Global overview
 #. Compile the project::
 
 	 cd leapmouse
-     make
+     ./rebuild.sh
 
 
 #. start Applicatyion::
